@@ -268,7 +268,6 @@ with c_tabla:
             "Total":                 st.column_config.NumberColumn("Total",   format="%d"),
         },
         width=700,
-        height=420,
     )
 
 st.markdown("<br>", unsafe_allow_html=True)

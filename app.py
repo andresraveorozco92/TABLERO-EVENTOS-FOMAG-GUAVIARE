@@ -207,7 +207,7 @@ k2.markdown(f'<div class="kpi-card green"><div class="kpi-label">Descartados</di
 k3.markdown(f'<div class="kpi-card red"><div class="kpi-label">Pendientes</div><div class="kpi-num">{pend}</div></div>', unsafe_allow_html=True)
 k4.markdown(f'<div class="kpi-card purple"><div class="kpi-label">Total General</div><div class="kpi-num">{total}</div></div>', unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
+# Sin margen inferior excesivo
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FILA 2: PIE + TABLA
@@ -232,13 +232,13 @@ with c_pie:
     fig_pie.update_traces(
         textposition="auto",
         textinfo="label+value+percent",
-        textfont_size=14,
+        textfont_size=18,
     )
     fig_pie.update_layout(
-        height=420,
+        height=360,
         margin=dict(t=10, b=10, l=10, r=10),
         showlegend=True,
-        legend=dict(font=dict(size=13)),
+        legend=dict(font=dict(size=14)),
         paper_bgcolor="rgba(0,0,0,0)",
     )
     st.plotly_chart(fig_pie, key="pie_chart", width="stretch")
@@ -270,7 +270,7 @@ with c_tabla:
         width=700,
     )
 
-st.markdown("<br>", unsafe_allow_html=True)
+# Sin margen extra
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FILA 3: BARRAS APILADAS POR SEMANA
@@ -291,19 +291,19 @@ fig_bar.add_trace(go.Bar(
     x=df_sem["Semana"], y=df_sem["Confirmados"],
     name="Confirmados", marker_color="#F57C00",
     text=df_sem["Confirmados"], textposition="inside",
-    textfont=dict(size=12, color="white"),
+    textfont=dict(size=16, color="white"),
 ))
 fig_bar.add_trace(go.Bar(
     x=df_sem["Semana"], y=df_sem["Descartados"],
     name="Descartados", marker_color="#27AE60",
     text=df_sem["Descartados"], textposition="inside",
-    textfont=dict(size=12, color="white"),
+    textfont=dict(size=16, color="white"),
 ))
 fig_bar.add_trace(go.Bar(
     x=df_sem["Semana"], y=df_sem["Pendientes por Ajuste"],
     name="Pendientes por Ajuste", marker_color="#C0392B",
     text=df_sem["Pendientes por Ajuste"], textposition="inside",
-    textfont=dict(size=12, color="white"),
+    textfont=dict(size=16, color="white"),
 ))
 fig_bar.update_layout(
     barmode="stack",
@@ -312,20 +312,20 @@ fig_bar.update_layout(
         type="category",
         tickmode="linear",
         tickangle=0,
-        tickfont=dict(size=12),
-        title_font=dict(size=14),
+        tickfont=dict(size=14),
+        title_font=dict(size=15),
     ),
     yaxis=dict(
         title="Casos",
-        tickfont=dict(size=13),
-        title_font=dict(size=14),
+        tickfont=dict(size=14),
+        title_font=dict(size=15),
         gridcolor="#ddd",
     ),
     legend=dict(orientation="h", y=1.08, x=0, font=dict(size=14)),
     margin=dict(t=50, b=30, l=20, r=20),
     plot_bgcolor="rgba(0,0,0,0)",
     paper_bgcolor="rgba(0,0,0,0)",
-    height=480,
+    height=380,
 )
 st.plotly_chart(fig_bar, key="bar_chart", width="stretch")
 

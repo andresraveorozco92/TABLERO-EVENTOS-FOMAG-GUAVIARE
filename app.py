@@ -3,6 +3,10 @@ import pandas as pd
 import sqlite3
 import plotly.express as px
 import plotly.graph_objects as go
+import base64
+
+with open("icono.png", "rb") as f:
+    icono_b64 = base64.b64encode(f.read()).decode()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURACIÓN DE PÁGINA — SIEMPRE PRIMERA
@@ -59,10 +63,12 @@ div.stButton > button {
     height: 65px !important;
     min-width: 140px !important;
     width: 100% !important;
-    font-size: 1.8rem !important;
-    font-weight: 900 !important;
     border-radius: 12px !important;
     letter-spacing: .08rem !important;
+}
+div.stButton > button p {
+    font-size: 1.8rem !important;
+    font-weight: 900 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -151,10 +157,13 @@ with st.sidebar:
 # ─────────────────────────────────────────────────────────────────────────────
 c_logo, c_b25, c_b26, c_titulo = st.columns([1.5, 1.5, 1.5, 4.5])
 with c_logo:
-    st.image("icono.png", width=120)
     st.markdown(
-        "<div style='font-weight:900; color:#2c3e70; margin-top:-15px; margin-left:5px; font-size:1.2rem;'>FOMAG GUAVIARE</div>",
-        unsafe_allow_html=True)
+        f"<div style='display:flex; flex-direction:column; align-items:center; margin-top:-10px;'>"
+        f"<img src='data:image/png;base64,{icono_b64}' width='120'/>"
+        f"<div style='font-weight:900; color:#2c3e70; margin-top:5px; font-size:1.1rem; text-align:center;'>FOMAG GUAVIARE</div>"
+        f"</div>",
+        unsafe_allow_html=True
+    )
 with c_b25:
     st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
     if st.button("2025", key="btn2025", use_container_width=True,
@@ -214,9 +223,9 @@ k1, k2, k3, k4, k5, k6 = st.columns(6)
 k1.markdown(f'<div class="kpi-card"><div class="kpi-label">Confirmados</div><div class="kpi-num">{conf}</div></div>', unsafe_allow_html=True)
 k2.markdown(f'<div class="kpi-card green"><div class="kpi-label">Descartados</div><div class="kpi-num">{desc}</div></div>', unsafe_allow_html=True)
 k3.markdown(f'<div class="kpi-card red"><div class="kpi-label">Pendientes</div><div class="kpi-num">{pend}</div></div>', unsafe_allow_html=True)
-k4.markdown(f'<div class="kpi-card purple"><div class="kpi-label">Total General</div><div class="kpi-num">{total}</div></div>', unsafe_allow_html=True)
-k5.markdown(f'<div class="kpi-card" style="border-top-color:#E91E8C"><div class="kpi-label">Femenino</div><div class="kpi-num" style="color:#E91E8C">{fem}</div></div>', unsafe_allow_html=True)
-k6.markdown(f'<div class="kpi-card" style="border-top-color:#1976D2"><div class="kpi-label">Masculino</div><div class="kpi-num" style="color:#1976D2">{masc}</div></div>', unsafe_allow_html=True)
+k4.markdown(f'<div class="kpi-card" style="border-top-color:#E91E8C"><div class="kpi-label">Femenino</div><div class="kpi-num" style="color:#E91E8C">{fem}</div></div>', unsafe_allow_html=True)
+k5.markdown(f'<div class="kpi-card" style="border-top-color:#1976D2"><div class="kpi-label">Masculino</div><div class="kpi-num" style="color:#1976D2">{masc}</div></div>', unsafe_allow_html=True)
+k6.markdown(f'<div class="kpi-card purple"><div class="kpi-label">Total General</div><div class="kpi-num">{total}</div></div>', unsafe_allow_html=True)
 
 st.markdown("<div style='margin-top:12px'></div>", unsafe_allow_html=True)
 

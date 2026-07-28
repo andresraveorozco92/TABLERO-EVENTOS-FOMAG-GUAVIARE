@@ -84,6 +84,12 @@ def load_data() -> pd.DataFrame:
     df["Semana"]            = df["Semana"].astype(int)
     for c in ["Confirmados", "Descartados", "Pendientes por Ajuste"]:
         df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0).astype(int)
+    # Columnas de sexo (retrocompatibles con archivos sin esas columnas)
+    for c in ["Femenino", "Masculino"]:
+        if c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0).astype(int)
+        else:
+            df[c] = 0
     df["Total"] = df["Confirmados"] + df["Descartados"] + df["Pendientes por Ajuste"]
     return df
 
@@ -102,7 +108,6 @@ if "year" not in st.session_state:
 # ─────────────────────────────────────────────────────────────────────────────
 # SIDEBAR ── FILTROS (SIEMPRE PRIMERO para que Streamlit lo registre)
 # ─────────────────────────────────────────────────────────────────────────────
-# Necesitamos los datos del año antes de construir el sidebar
 df_year_pre = df_raw[df_raw["Año"] == st.session_state.year].copy()
 
 with st.sidebar:
@@ -200,19 +205,23 @@ conf  = int(df_f["Confirmados"].sum())
 desc  = int(df_f["Descartados"].sum())
 pend  = int(df_f["Pendientes por Ajuste"].sum())
 total = int(df_f["Total"].sum())
+fem   = int(df_f["Femenino"].sum())
+masc  = int(df_f["Masculino"].sum())
 
-k1, k2, k3, k4 = st.columns(4)
+k1, k2, k3, k4, k5, k6 = st.columns(6)
 k1.markdown(f'<div class="kpi-card"><div class="kpi-label">Confirmados</div><div class="kpi-num">{conf}</div></div>', unsafe_allow_html=True)
 k2.markdown(f'<div class="kpi-card green"><div class="kpi-label">Descartados</div><div class="kpi-num">{desc}</div></div>', unsafe_allow_html=True)
 k3.markdown(f'<div class="kpi-card red"><div class="kpi-label">Pendientes</div><div class="kpi-num">{pend}</div></div>', unsafe_allow_html=True)
 k4.markdown(f'<div class="kpi-card purple"><div class="kpi-label">Total General</div><div class="kpi-num">{total}</div></div>', unsafe_allow_html=True)
+k5.markdown(f'<div class="kpi-card" style="border-top-color:#E91E8C"><div class="kpi-label">Femenino</div><div class="kpi-num" style="color:#E91E8C">{fem}</div></div>', unsafe_allow_html=True)
+k6.markdown(f'<div class="kpi-card" style="border-top-color:#1976D2"><div class="kpi-label">Masculino</div><div class="kpi-num" style="color:#1976D2">{masc}</div></div>', unsafe_allow_html=True)
 
-# Sin margen inferior excesivo
+st.markdown("<div style='margin-top:12px'></div>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# FILA 2: PIE + TABLA
+# FILA 2: PIE | TABLA RESUMEN | GRÁFICO SEXO
 # ─────────────────────────────────────────────────────────────────────────────
-c_pie, c_tabla = st.columns([1, 1])
+c_pie, c_tabla, c_sexo = st.columns([1.15, 1, 1])
 
 COLORES_MUNI = {
     "San José del Guaviare": "#1E88E5",
@@ -222,6 +231,7 @@ COLORES_MUNI = {
     "Puerto Concordia":      "#FFB300",
 }
 
+# ── PIE ──
 with c_pie:
     st.markdown('<div class="sec-title">TOTALES POR MUNICIPIO</div>', unsafe_allow_html=True)
     df_muni = df_f.groupby("Municipio")["Total"].sum().reset_index()
@@ -232,17 +242,18 @@ with c_pie:
     fig_pie.update_traces(
         textposition="auto",
         textinfo="label+value+percent",
-        textfont_size=18,
+        textfont_size=16,
     )
     fig_pie.update_layout(
         height=360,
         margin=dict(t=10, b=10, l=10, r=10),
         showlegend=True,
-        legend=dict(font=dict(size=14)),
+        legend=dict(font=dict(size=13)),
         paper_bgcolor="rgba(0,0,0,0)",
     )
     st.plotly_chart(fig_pie, key="pie_chart", width="stretch")
 
+# ── TABLA RESUMEN ──
 with c_tabla:
     st.markdown('<div class="sec-title">RESUMEN POR MUNICIPIO</div>', unsafe_allow_html=True)
     df_t = (
@@ -267,10 +278,51 @@ with c_tabla:
             "Pendientes por Ajuste": st.column_config.NumberColumn("Pend.",   format="%d"),
             "Total":                 st.column_config.NumberColumn("Total",   format="%d"),
         },
-        width=700,
+        width=520,
     )
 
-# Sin margen extra
+# ── GRÁFICO SEXO POR MUNICIPIO ──
+with c_sexo:
+    st.markdown('<div class="sec-title">CASOS POR SEXO Y MUNICIPIO</div>', unsafe_allow_html=True)
+    df_sexo = (
+        df_f.groupby("Municipio")[["Femenino", "Masculino"]]
+        .sum()
+        .reset_index()
+        .sort_values("Municipio")
+    )
+    fig_sexo = go.Figure()
+    fig_sexo.add_trace(go.Bar(
+        x=df_sexo["Municipio"], y=df_sexo["Femenino"],
+        name="Femenino", marker_color="#E91E8C",
+        text=df_sexo["Femenino"], textposition="inside",
+        textfont=dict(size=15, color="white"),
+    ))
+    fig_sexo.add_trace(go.Bar(
+        x=df_sexo["Municipio"], y=df_sexo["Masculino"],
+        name="Masculino", marker_color="#1976D2",
+        text=df_sexo["Masculino"], textposition="inside",
+        textfont=dict(size=15, color="white"),
+    ))
+    fig_sexo.update_layout(
+        barmode="group",
+        xaxis=dict(
+            tickfont=dict(size=12),
+            tickangle=-30,
+            title_font=dict(size=13),
+        ),
+        yaxis=dict(
+            title="Casos",
+            tickfont=dict(size=13),
+            title_font=dict(size=13),
+            gridcolor="#ddd",
+        ),
+        legend=dict(orientation="h", y=1.06, x=0, font=dict(size=13)),
+        margin=dict(t=40, b=10, l=10, r=10),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        height=360,
+    )
+    st.plotly_chart(fig_sexo, key="sexo_chart", width="stretch")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FILA 3: BARRAS APILADAS POR SEMANA
@@ -283,7 +335,6 @@ df_sem = (
     .reset_index()
     .sort_values("Semana")
 )
-# Convertir a string para que el eje X trate cada semana como categoría independiente
 df_sem["Semana"] = df_sem["Semana"].astype(str)
 
 fig_bar = go.Figure()

@@ -149,24 +149,27 @@ with st.sidebar:
 # ─────────────────────────────────────────────────────────────────────────────
 # CABECERA PRINCIPAL
 # ─────────────────────────────────────────────────────────────────────────────
-c_logo, c_b25, c_b26, c_titulo = st.columns([1.5, 1, 1, 5])
+c_logo, c_b25, c_b26, c_titulo = st.columns([1.5, 1.5, 1.5, 4.5])
 with c_logo:
-    st.image("icono.png", width=160)
+    st.image("icono.png", width=120)
+    st.markdown(
+        "<div style='font-weight:900; color:#2c3e70; margin-top:-15px; margin-left:5px; font-size:1.2rem;'>FOMAG GUAVIARE</div>",
+        unsafe_allow_html=True)
 with c_b25:
-    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
-    if st.button("2025", key="btn2025",
+    st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
+    if st.button("2025", key="btn2025", use_container_width=True,
                  type="primary" if st.session_state.year == 2025 else "secondary"):
         st.session_state.year = 2025
         st.rerun()
 with c_b26:
-    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
-    if st.button("2026", key="btn2026",
+    st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
+    if st.button("2026", key="btn2026", use_container_width=True,
                  type="primary" if st.session_state.year == 2026 else "secondary"):
         st.session_state.year = 2026
         st.rerun()
 with c_titulo:
     st.markdown(
-        f"<div style='text-align:right; padding-top:14px; font-size:1.7rem;"
+        f"<div style='text-align:right; padding-top:35px; font-size:1.8rem;"
         f" font-weight:900; color:#2c3e70;'>"
         f"EVENTOS NOTIFICADOS SIVIGILA — {st.session_state.year}</div>",
         unsafe_allow_html=True)

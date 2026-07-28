@@ -56,12 +56,13 @@ st.markdown("""
 
 /* ── Botones de año más grandes ── */
 div.stButton > button {
-    height: 56px !important;
-    min-width: 110px !important;
-    font-size: 1.4rem !important;
-    font-weight: 800 !important;
-    border-radius: 10px !important;
-    letter-spacing: .05rem !important;
+    height: 65px !important;
+    min-width: 140px !important;
+    width: 100% !important;
+    font-size: 1.8rem !important;
+    font-weight: 900 !important;
+    border-radius: 12px !important;
+    letter-spacing: .08rem !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -150,9 +151,7 @@ with st.sidebar:
 # ─────────────────────────────────────────────────────────────────────────────
 c_logo, c_b25, c_b26, c_titulo = st.columns([1.5, 1, 1, 5])
 with c_logo:
-    st.markdown(
-        "<h2 style='margin:0; padding-top:14px; color:#2c3e70;'>FOMAG</h2>",
-        unsafe_allow_html=True)
+    st.image("icono.png", width=160)
 with c_b25:
     st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
     if st.button("2025", key="btn2025",

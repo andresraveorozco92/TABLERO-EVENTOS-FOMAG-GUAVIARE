@@ -13,6 +13,7 @@ with open("icono.png", "rb") as f:
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Tablero Epidemiológico FOMAG",
+    page_icon="favicon.png",
     layout="wide",
     initial_sidebar_state="expanded",
 )

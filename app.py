@@ -303,7 +303,7 @@ with c_tabla:
         width=520,
     )
 
-# ── GRÁFICO SEXO POR MUNICIPIO (BARRAS APILADAS) ──
+# ── GRÁFICO SEXO POR MUNICIPIO (BARRAS APILADAS HORIZONTALES) ──
 with c_sexo:
     st.markdown('<div class="sec-title">CASOS POR SEXO Y MUNICIPIO</div>', unsafe_allow_html=True)
     df_sexo = (
@@ -314,33 +314,35 @@ with c_sexo:
     )
     fig_sexo = go.Figure()
     fig_sexo.add_trace(go.Bar(
-        x=df_sexo["Municipio"], y=df_sexo["Femenino"],
+        y=df_sexo["Municipio"], x=df_sexo["Femenino"],
         name="Femenino", marker_color="#E91E8C",
+        orientation="h",
         text=[str(v) if v > 0 else "" for v in df_sexo["Femenino"]],
         textposition="inside",
-        textfont=dict(size=15, color="white"),
+        textfont=dict(size=14, color="white"),
     ))
     fig_sexo.add_trace(go.Bar(
-        x=df_sexo["Municipio"], y=df_sexo["Masculino"],
+        y=df_sexo["Municipio"], x=df_sexo["Masculino"],
         name="Masculino", marker_color="#1976D2",
+        orientation="h",
         text=[str(v) if v > 0 else "" for v in df_sexo["Masculino"]],
         textposition="inside",
-        textfont=dict(size=15, color="white"),
+        textfont=dict(size=14, color="white"),
     ))
     fig_sexo.update_layout(
         barmode="stack",
         xaxis=dict(
-            tickfont=dict(size=12),
-            tickangle=-30,
-            title_font=dict(size=13),
-        ),
-        yaxis=dict(
             title="Casos",
-            tickfont=dict(size=13),
+            tickfont=dict(size=12),
             title_font=dict(size=13),
             gridcolor="#ddd",
         ),
-        legend=dict(orientation="h", y=1.06, x=0, font=dict(size=13)),
+        yaxis=dict(
+            autorange="reversed",
+            tickfont=dict(size=12),
+            title_font=dict(size=13),
+        ),
+        legend=dict(orientation="h", y=1.12, x=0, font=dict(size=13)),
         margin=dict(t=40, b=10, l=10, r=10),
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",

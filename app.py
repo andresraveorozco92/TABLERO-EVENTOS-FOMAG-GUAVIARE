@@ -414,7 +414,7 @@ fig_cv.update_layout(
     bargap=0.15,
     xaxis=dict(
         title="",
-        tickangle=0,
+        tickangle=-90,
         tickfont=dict(size=12, color="#2c3e70"),
     ),
     yaxis=dict(
@@ -424,10 +424,10 @@ fig_cv.update_layout(
         gridcolor="#ddd",
     ),
     legend=dict(orientation="h", y=1.08, x=0, font=dict(size=14)),
-    margin=dict(t=50, b=30, l=20, r=20),
+    margin=dict(t=50, b=90, l=20, r=20),
     plot_bgcolor="rgba(0,0,0,0)",
     paper_bgcolor="rgba(0,0,0,0)",
-    height=480,
+    height=520,
 )
 st.plotly_chart(fig_cv, key="cv_chart", width="stretch")
 

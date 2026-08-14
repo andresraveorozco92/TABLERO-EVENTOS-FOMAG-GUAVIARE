@@ -361,8 +361,17 @@ with c_sexo:
 st.markdown('<div class="sec-title">CASOS POR MUNICIPIO, CURSO DE VIDA Y SEXO</div>', unsafe_allow_html=True)
 
 cursos_lista = ["Primera Infancia", "Infancia", "Adolescencia", "Juventud", "Adultez", "Vejez"]
+
+# Ordenar municipios de mayor a menor según el total de casos
+muni_ordenados = (
+    df_f.groupby("Municipio")["Total"]
+    .sum()
+    .sort_values(ascending=False)
+    .index.tolist()
+)
+
 rows_cv = []
-for muni in sorted(df_f["Municipio"].dropna().unique()):
+for muni in muni_ordenados:
     df_m = df_f[df_f["Municipio"] == muni]
     for c in cursos_lista:
         fem_c = f"{c} Femenino"
@@ -387,7 +396,8 @@ fig_cv.add_trace(go.Bar(
     marker_color="#E91E8C",
     text=[str(v) if v > 0 else "" for v in df_cv["Femenino"]],
     textposition="inside",
-    textfont=dict(size=13, color="white"),
+    insidetextanchor="middle",
+    textfont=dict(size=15, color="white"),
 ))
 fig_cv.add_trace(go.Bar(
     x=[df_cv["Municipio"], df_cv["Curso de Vida"]],
@@ -396,26 +406,28 @@ fig_cv.add_trace(go.Bar(
     marker_color="#1976D2",
     text=[str(v) if v > 0 else "" for v in df_cv["Masculino"]],
     textposition="inside",
-    textfont=dict(size=13, color="white"),
+    insidetextanchor="middle",
+    textfont=dict(size=15, color="white"),
 ))
 fig_cv.update_layout(
     barmode="stack",
+    bargap=0.15,
     xaxis=dict(
         title="",
         tickangle=0,
-        tickfont=dict(size=12),
+        tickfont=dict(size=12, color="#2c3e70"),
     ),
     yaxis=dict(
         title="Casos",
         tickfont=dict(size=14),
-        title_font=dict(size=15),
+        title_font=dict(size=15, color="#2c3e70"),
         gridcolor="#ddd",
     ),
     legend=dict(orientation="h", y=1.08, x=0, font=dict(size=14)),
     margin=dict(t=50, b=30, l=20, r=20),
     plot_bgcolor="rgba(0,0,0,0)",
     paper_bgcolor="rgba(0,0,0,0)",
-    height=400,
+    height=480,
 )
 st.plotly_chart(fig_cv, key="cv_chart", width="stretch")
 

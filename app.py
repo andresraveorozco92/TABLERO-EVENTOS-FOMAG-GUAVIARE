@@ -310,8 +310,10 @@ with c_sexo:
         df_f.groupby("Municipio")[["Femenino", "Masculino"]]
         .sum()
         .reset_index()
-        .sort_values("Municipio")
     )
+    df_sexo["Total_Sexo"] = df_sexo["Femenino"] + df_sexo["Masculino"]
+    df_sexo = df_sexo.sort_values("Total_Sexo", ascending=False)
+
     fig_sexo = go.Figure()
     fig_sexo.add_trace(go.Bar(
         y=df_sexo["Municipio"], x=df_sexo["Femenino"],
@@ -319,7 +321,8 @@ with c_sexo:
         orientation="h",
         text=[str(v) if v > 0 else "" for v in df_sexo["Femenino"]],
         textposition="inside",
-        textfont=dict(size=14, color="white"),
+        insidetextanchor="middle",
+        textfont=dict(size=16, color="white"),
     ))
     fig_sexo.add_trace(go.Bar(
         y=df_sexo["Municipio"], x=df_sexo["Masculino"],
@@ -327,26 +330,28 @@ with c_sexo:
         orientation="h",
         text=[str(v) if v > 0 else "" for v in df_sexo["Masculino"]],
         textposition="inside",
-        textfont=dict(size=14, color="white"),
+        insidetextanchor="middle",
+        textfont=dict(size=16, color="white"),
     ))
     fig_sexo.update_layout(
         barmode="stack",
+        bargap=0.18,
         xaxis=dict(
             title="Casos",
-            tickfont=dict(size=12),
-            title_font=dict(size=13),
+            tickfont=dict(size=13),
+            title_font=dict(size=14, color="#2c3e70"),
             gridcolor="#ddd",
         ),
         yaxis=dict(
             autorange="reversed",
-            tickfont=dict(size=12),
+            tickfont=dict(size=13, color="#2c3e70"),
             title_font=dict(size=13),
         ),
-        legend=dict(orientation="h", y=1.12, x=0, font=dict(size=13)),
+        legend=dict(orientation="h", y=1.12, x=0, font=dict(size=14)),
         margin=dict(t=40, b=10, l=10, r=10),
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
-        height=360,
+        height=370,
     )
     st.plotly_chart(fig_sexo, key="sexo_chart", width="stretch")
 

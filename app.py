@@ -92,12 +92,22 @@ def load_data() -> pd.DataFrame:
     df["Semana"]            = df["Semana"].astype(int)
     for c in ["Confirmados", "Descartados", "Pendientes por Ajuste"]:
         df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0).astype(int)
-    # Columnas de sexo (retrocompatibles con archivos sin esas columnas)
+    # Columnas de sexo
     for c in ["Femenino", "Masculino"]:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0).astype(int)
         else:
             df[c] = 0
+
+    cursos = ["Primera Infancia", "Infancia", "Adolescencia", "Juventud", "Adultez", "Vejez"]
+    for cv in cursos:
+        for sx in ["Femenino", "Masculino"]:
+            col_name = f"{cv} {sx}"
+            if col_name in df.columns:
+                df[col_name] = pd.to_numeric(df[col_name], errors="coerce").fillna(0).astype(int)
+            else:
+                df[col_name] = 0
+
     df["Total"] = df["Confirmados"] + df["Descartados"] + df["Pendientes por Ajuste"]
     return df
 
@@ -193,7 +203,7 @@ st.markdown("<hr style='border:2px solid #c3cbe8; margin-top:4px; margin-bottom:
 df_year = df_raw[df_raw["Año"] == st.session_state.year].copy()
 
 if not eventos_sel:
-    st.warning("Selecciona al menos un evento en el panel de filtros.")
+    st.warning("Selecciona al menos un evento notificado en el panel de filtros.")
     st.stop()
 
 if not muni_sel:
@@ -231,7 +241,7 @@ k6.markdown(f'<div class="kpi-card purple"><div class="kpi-label">Total General<
 st.markdown("<div style='margin-top:12px'></div>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# FILA 2: PIE | TABLA RESUMEN | GRÁFICO SEXO
+# FILA 2: PIE | TABLA RESUMEN | GRÁFICO SEXO (BARRAS APILADAS)
 # ─────────────────────────────────────────────────────────────────────────────
 c_pie, c_tabla, c_sexo = st.columns([1.15, 1, 1])
 
@@ -293,7 +303,7 @@ with c_tabla:
         width=520,
     )
 
-# ── GRÁFICO SEXO POR MUNICIPIO ──
+# ── GRÁFICO SEXO POR MUNICIPIO (BARRAS APILADAS) ──
 with c_sexo:
     st.markdown('<div class="sec-title">CASOS POR SEXO Y MUNICIPIO</div>', unsafe_allow_html=True)
     df_sexo = (
@@ -306,17 +316,19 @@ with c_sexo:
     fig_sexo.add_trace(go.Bar(
         x=df_sexo["Municipio"], y=df_sexo["Femenino"],
         name="Femenino", marker_color="#E91E8C",
-        text=df_sexo["Femenino"], textposition="inside",
+        text=[str(v) if v > 0 else "" for v in df_sexo["Femenino"]],
+        textposition="inside",
         textfont=dict(size=15, color="white"),
     ))
     fig_sexo.add_trace(go.Bar(
         x=df_sexo["Municipio"], y=df_sexo["Masculino"],
         name="Masculino", marker_color="#1976D2",
-        text=df_sexo["Masculino"], textposition="inside",
+        text=[str(v) if v > 0 else "" for v in df_sexo["Masculino"]],
+        textposition="inside",
         textfont=dict(size=15, color="white"),
     ))
     fig_sexo.update_layout(
-        barmode="group",
+        barmode="stack",
         xaxis=dict(
             tickfont=dict(size=12),
             tickangle=-30,
@@ -337,7 +349,71 @@ with c_sexo:
     st.plotly_chart(fig_sexo, key="sexo_chart", width="stretch")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# FILA 3: BARRAS APILADAS POR SEMANA
+# FILA 3: CASOS POR MUNICIPIO, CURSO DE VIDA Y SEXO (BARRAS APILADAS)
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown('<div class="sec-title">CASOS POR MUNICIPIO, CURSO DE VIDA Y SEXO</div>', unsafe_allow_html=True)
+
+cursos_lista = ["Primera Infancia", "Infancia", "Adolescencia", "Juventud", "Adultez", "Vejez"]
+rows_cv = []
+for muni in sorted(df_f["Municipio"].dropna().unique()):
+    df_m = df_f[df_f["Municipio"] == muni]
+    for c in cursos_lista:
+        fem_c = f"{c} Femenino"
+        masc_c = f"{c} Masculino"
+        fem_v = int(df_m[fem_c].sum()) if fem_c in df_m.columns else 0
+        masc_v = int(df_m[masc_c].sum()) if masc_c in df_m.columns else 0
+        rows_cv.append({
+            "Municipio": muni,
+            "Curso de Vida": c,
+            "Femenino": fem_v,
+            "Masculino": masc_v,
+            "Total": fem_v + masc_v,
+        })
+
+df_cv = pd.DataFrame(rows_cv)
+
+fig_cv = go.Figure()
+fig_cv.add_trace(go.Bar(
+    x=[df_cv["Municipio"], df_cv["Curso de Vida"]],
+    y=df_cv["Femenino"],
+    name="Femenino",
+    marker_color="#E91E8C",
+    text=[str(v) if v > 0 else "" for v in df_cv["Femenino"]],
+    textposition="inside",
+    textfont=dict(size=13, color="white"),
+))
+fig_cv.add_trace(go.Bar(
+    x=[df_cv["Municipio"], df_cv["Curso de Vida"]],
+    y=df_cv["Masculino"],
+    name="Masculino",
+    marker_color="#1976D2",
+    text=[str(v) if v > 0 else "" for v in df_cv["Masculino"]],
+    textposition="inside",
+    textfont=dict(size=13, color="white"),
+))
+fig_cv.update_layout(
+    barmode="stack",
+    xaxis=dict(
+        title="",
+        tickangle=0,
+        tickfont=dict(size=12),
+    ),
+    yaxis=dict(
+        title="Casos",
+        tickfont=dict(size=14),
+        title_font=dict(size=15),
+        gridcolor="#ddd",
+    ),
+    legend=dict(orientation="h", y=1.08, x=0, font=dict(size=14)),
+    margin=dict(t=50, b=30, l=20, r=20),
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
+    height=400,
+)
+st.plotly_chart(fig_cv, key="cv_chart", width="stretch")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FILA 4: BARRAS APILADAS POR SEMANA
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown('<div class="sec-title">CASOS POR SEMANA EPIDEMIOLÓGICA</div>', unsafe_allow_html=True)
 
@@ -353,19 +429,22 @@ fig_bar = go.Figure()
 fig_bar.add_trace(go.Bar(
     x=df_sem["Semana"], y=df_sem["Confirmados"],
     name="Confirmados", marker_color="#F57C00",
-    text=df_sem["Confirmados"], textposition="inside",
+    text=[str(v) if v > 0 else "" for v in df_sem["Confirmados"]],
+    textposition="inside",
     textfont=dict(size=16, color="white"),
 ))
 fig_bar.add_trace(go.Bar(
     x=df_sem["Semana"], y=df_sem["Descartados"],
     name="Descartados", marker_color="#27AE60",
-    text=df_sem["Descartados"], textposition="inside",
+    text=[str(v) if v > 0 else "" for v in df_sem["Descartados"]],
+    textposition="inside",
     textfont=dict(size=16, color="white"),
 ))
 fig_bar.add_trace(go.Bar(
     x=df_sem["Semana"], y=df_sem["Pendientes por Ajuste"],
     name="Pendientes por Ajuste", marker_color="#C0392B",
-    text=df_sem["Pendientes por Ajuste"], textposition="inside",
+    text=[str(v) if v > 0 else "" for v in df_sem["Pendientes por Ajuste"]],
+    textposition="inside",
     textfont=dict(size=16, color="white"),
 ))
 fig_bar.update_layout(
@@ -391,17 +470,3 @@ fig_bar.update_layout(
     height=380,
 )
 st.plotly_chart(fig_bar, key="bar_chart", width="stretch")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# EXPANDER: TABLA DETALLADA
-# ─────────────────────────────────────────────────────────────────────────────
-with st.expander("📄 Ver registros detallados"):
-    st.dataframe(
-        df_f.sort_values(["Semana", "Evento Notificado"]),
-        hide_index=True,
-    )
-    csv = df_f.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        "⬇ Descargar CSV", csv,
-        "eventos_filtrados.csv", "text/csv",
-    )

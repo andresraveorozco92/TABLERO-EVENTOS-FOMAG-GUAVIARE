@@ -356,7 +356,66 @@ with c_sexo:
     st.plotly_chart(fig_sexo, key="sexo_chart", width="stretch")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# FILA 3: CASOS POR MUNICIPIO, CURSO DE VIDA Y SEXO (BARRAS APILADAS)
+# FILA 3: BARRAS APILADAS POR SEMANA
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown('<div class="sec-title">CASOS POR SEMANA EPIDEMIOLÓGICA</div>', unsafe_allow_html=True)
+
+df_sem = (
+    df_f.groupby("Semana")[["Confirmados", "Descartados", "Pendientes por Ajuste"]]
+    .sum()
+    .reset_index()
+    .sort_values("Semana")
+)
+df_sem["Semana"] = df_sem["Semana"].astype(str)
+
+fig_bar = go.Figure()
+fig_bar.add_trace(go.Bar(
+    x=df_sem["Semana"], y=df_sem["Confirmados"],
+    name="Confirmados", marker_color="#F57C00",
+    text=[str(v) if v > 0 else "" for v in df_sem["Confirmados"]],
+    textposition="inside",
+    textfont=dict(size=16, color="white"),
+))
+fig_bar.add_trace(go.Bar(
+    x=df_sem["Semana"], y=df_sem["Descartados"],
+    name="Descartados", marker_color="#27AE60",
+    text=[str(v) if v > 0 else "" for v in df_sem["Descartados"]],
+    textposition="inside",
+    textfont=dict(size=16, color="white"),
+))
+fig_bar.add_trace(go.Bar(
+    x=df_sem["Semana"], y=df_sem["Pendientes por Ajuste"],
+    name="Pendientes por Ajuste", marker_color="#C0392B",
+    text=[str(v) if v > 0 else "" for v in df_sem["Pendientes por Ajuste"]],
+    textposition="inside",
+    textfont=dict(size=16, color="white"),
+))
+fig_bar.update_layout(
+    barmode="stack",
+    xaxis=dict(
+        title="Semana Epidemiológica",
+        type="category",
+        tickmode="linear",
+        tickangle=0,
+        tickfont=dict(size=14),
+        title_font=dict(size=15),
+    ),
+    yaxis=dict(
+        title="Casos",
+        tickfont=dict(size=14),
+        title_font=dict(size=15),
+        gridcolor="#ddd",
+    ),
+    legend=dict(orientation="h", y=1.08, x=0, font=dict(size=14)),
+    margin=dict(t=50, b=30, l=20, r=20),
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
+    height=380,
+)
+st.plotly_chart(fig_bar, key="bar_chart", width="stretch")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FILA 4: CASOS POR MUNICIPIO, CURSO DE VIDA Y SEXO (BARRAS APILADAS)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown('<div class="sec-title">CASOS POR MUNICIPIO, CURSO DE VIDA Y SEXO</div>', unsafe_allow_html=True)
 
@@ -430,62 +489,3 @@ fig_cv.update_layout(
     height=520,
 )
 st.plotly_chart(fig_cv, key="cv_chart", width="stretch")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# FILA 4: BARRAS APILADAS POR SEMANA
-# ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<div class="sec-title">CASOS POR SEMANA EPIDEMIOLÓGICA</div>', unsafe_allow_html=True)
-
-df_sem = (
-    df_f.groupby("Semana")[["Confirmados", "Descartados", "Pendientes por Ajuste"]]
-    .sum()
-    .reset_index()
-    .sort_values("Semana")
-)
-df_sem["Semana"] = df_sem["Semana"].astype(str)
-
-fig_bar = go.Figure()
-fig_bar.add_trace(go.Bar(
-    x=df_sem["Semana"], y=df_sem["Confirmados"],
-    name="Confirmados", marker_color="#F57C00",
-    text=[str(v) if v > 0 else "" for v in df_sem["Confirmados"]],
-    textposition="inside",
-    textfont=dict(size=16, color="white"),
-))
-fig_bar.add_trace(go.Bar(
-    x=df_sem["Semana"], y=df_sem["Descartados"],
-    name="Descartados", marker_color="#27AE60",
-    text=[str(v) if v > 0 else "" for v in df_sem["Descartados"]],
-    textposition="inside",
-    textfont=dict(size=16, color="white"),
-))
-fig_bar.add_trace(go.Bar(
-    x=df_sem["Semana"], y=df_sem["Pendientes por Ajuste"],
-    name="Pendientes por Ajuste", marker_color="#C0392B",
-    text=[str(v) if v > 0 else "" for v in df_sem["Pendientes por Ajuste"]],
-    textposition="inside",
-    textfont=dict(size=16, color="white"),
-))
-fig_bar.update_layout(
-    barmode="stack",
-    xaxis=dict(
-        title="Semana Epidemiológica",
-        type="category",
-        tickmode="linear",
-        tickangle=0,
-        tickfont=dict(size=14),
-        title_font=dict(size=15),
-    ),
-    yaxis=dict(
-        title="Casos",
-        tickfont=dict(size=14),
-        title_font=dict(size=15),
-        gridcolor="#ddd",
-    ),
-    legend=dict(orientation="h", y=1.08, x=0, font=dict(size=14)),
-    margin=dict(t=50, b=30, l=20, r=20),
-    plot_bgcolor="rgba(0,0,0,0)",
-    paper_bgcolor="rgba(0,0,0,0)",
-    height=380,
-)
-st.plotly_chart(fig_bar, key="bar_chart", width="stretch")
